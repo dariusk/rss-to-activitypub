@@ -28,17 +28,17 @@ Update your new `config.json` file:
 }
 ```
 
-`DOMAIN`: your domain! this should be a discoverable domain of some kind like "example.com" or "rss.example.com"
-`PORT_HTTP`: the http port that Express runs on
-`PORT_HTTPS`: the https port that Express runs on
-`PRIVKEY_PATH`: point this to your private key you got from Certbot or similar
-`CERT_PATH`: point this to your cert you got from Certbot or similar
+* `DOMAIN`: your domain! this should be a discoverable domain of some kind like "example.com" or "rss.example.com"
+* `PORT_HTTP`: the http port that Express runs on
+* `PORT_HTTPS`: the https port that Express runs on
+* `PRIVKEY_PATH`: point this to your private key you got from Certbot or similar
+* `CERT_PATH`: point this to your cert you got from Certbot or similar
 
 Run the server!
 
 `node index.js`
 
-Go to `https://whateveryourdomainis.com:3000/convert` or whatever port you selected for HTTP, and enter an RSS feed and a username.If all goes well it will create a new ActivityPub user with instructions on how to view the user.
+Go to `https://whateveryourdomainis.com:3000/convert` or whatever port you selected for HTTP, and enter an RSS feed and a username. If all goes well it will create a new ActivityPub user with instructions on how to view the user.
 
 ## Sending out updates to followers
 

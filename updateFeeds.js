@@ -34,20 +34,20 @@ for (var feed of feeds) {
       let difference = new Set( [...newGuidSet].filter(x => !oldGuidSet.has(x)));
       difference = [...difference];
       
-      console.log('diff', difference);
+      //console.log('diff', difference);
 
       if (difference.length > 0) {
         // get a list of new items in the diff
         let brandNewItems = newItems.filter(el => difference.includes(el.guid) || difference.includes(el.title) || difference.includes(el.description));
         let acct = feed.username;
         let domain = 'bots.tinysubversions.com';
-        console.log(acct, brandNewItems);
+        //console.log(acct, brandNewItems);
 
         // send the message to everyone for each item!
         for (var item of brandNewItems) {
           // FIX THIS
           item = transformContent(item);
-          console.log(item.urls);
+          //console.log(item.urls);
           let message = `<p><a href="${item.link}">${item.title}</a></p><p>${item.content}</p>`;
           if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
             message += `<p><a href="${item.enclosure.url}">${item.enclosure.url}</a></p>`;
@@ -57,7 +57,7 @@ for (var feed of feeds) {
 
         // update the DB with new contents
         let content = JSON.stringify(feedData);
-        db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run( feed, acct, content);
+        db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run(feed.feed, acct, content);
       }
     }
   });
@@ -68,7 +68,7 @@ for (var feed of feeds) {
 // This is a function with a bunch of custom rules for different kinds of content I've found in the wild in things like Reddit rss feeds
 function transformContent(item) {
   let cheerio = require('cheerio');
-  console.log(item.content);
+  //console.log(item.content);
   if (item.content === undefined) {
     item.urls = [];
     return item;
@@ -78,12 +78,12 @@ function transformContent(item) {
   // look through all the links
   let links = $('a');
   let urls = [];
-  console.log('links', links.length);
+  //console.log('links', links.length);
   links.each((i,e) => {
     let url = $(e).attr('href');
     // if there's an image, add it as a media attachment
-    if (url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
-      console.log(url);
+    if (url && url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
+      //console.log(url);
       urls.push(url);
     }
   });
@@ -97,7 +97,7 @@ function transformContent(item) {
 
   // convert li items to bullet points
   $('li').each((i, el) => {
-    console.log($(el).html());
+    //console.log($(el).html());
     $(el).replaceWith(`<span>- ${$(el).html()}</span><br>`);
   });
 
@@ -114,7 +114,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
   console.log('sending to ', name, targetDomain, inbox);
   let inboxFragment = inbox.replace('https://'+targetDomain,'');
   let result = db.prepare('select privkey from accounts where name = ?').get(name);
-  console.log('got key', result === undefined, `${name}@${domain}`);
+  //console.log('got key', result === undefined, `${name}@${domain}`);
   if (result === undefined) {
     console.log(`No record found for ${name}.`);
   }
@@ -128,7 +128,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
     const signature = signer.sign(privkey);
     const signature_b64 = signature.toString('base64');
     let header = `keyId="https://${domain}/u/${name}",headers="(request-target) host date",signature="${signature_b64}"`;
-    console.log('signature:',header);
+    //console.log('signature:',header);
     request({
       url: inbox,
       headers: {
@@ -168,7 +168,7 @@ function createMessage(text, name, domain, item) {
   // add image attachment
   let attachment;
   if (item.urls.length > 0) {
-    console.log('appending');
+    //console.log('appending');
     attachment = {
       'type': 'Document',
       'mediaType': 'image/png', // TODO: update the mediaType to match jpeg,gif,etc
@@ -186,7 +186,10 @@ function sendCreateMessage(text, name, domain, req, res, item) {
 
   let result = db.prepare('select followers from accounts where name = ?').get(`${name}@${domain}`);
   let followers = JSON.parse(result.followers);
-  console.log(followers);
+  //console.log(followers);
+  if (!followers) {
+    followers = [];
+  }
   for (let follower of followers) {
     let inbox = follower+'/inbox';
     let myURL = new URL(follower);

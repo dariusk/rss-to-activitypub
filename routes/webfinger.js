@@ -15,7 +15,7 @@ router.get('/', function (req, res) {
       return res.status(404).send(`No record found for ${name}.`);
     }
     else {
-      res.json(result.webfinger);
+      res.json(JSON.parse(result.webfinger));
     }
   }
 });

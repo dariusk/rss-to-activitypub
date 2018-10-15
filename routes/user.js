@@ -16,10 +16,10 @@ router.get('/:name', function (req, res) {
       return res.status(404).json(`No record found for ${name}.`);
     }
     else if (req.headers.accept.includes('application/activity+json') || req.headers.accept.includes('application/json') || req.headers.accept.includes('application/json+ld')) {
-      res.json(result.actor);
+      res.json(JSON.parse(result.actor));
     }
     else {
-      let actor = result.actor;
+      let actor = JSON.parse(result.actor);
       let username = name.replace('@'+domain,'');
       console.log(username, actor);
       let content = db.prepare('select content from feeds where username = ?').get(username);
@@ -29,9 +29,10 @@ router.get('/:name', function (req, res) {
       let feedData = JSON.parse(content.content);
       let imageUrl = null;
       // if image exists set image
-      if (feedData.image && feedData.image.url) {
-        imageUrl = feedData.image.url;
+      if (actor.icon && actor.icon.url) {
+        imageUrl = actor.icon.url;
       }
+      console.log(actor, imageUrl);
       res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl });
     }
   }

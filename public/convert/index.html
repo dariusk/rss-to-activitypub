@@ -5,43 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Convert an RSS feed to ActivityPub</title>
   <style>
-  body {
-    font-family: sans-serif;
-    max-width: 900px;
-    margin: 30px;
-  }
-  img {
-    max-width: 100px;
-  }
-  li {
-    margin-bottom: 0.2em;
-  }
-  .account {
-  }
-  input {
-    width: 300px;
-    font-size: 1.2em;
-  }
-  .hint {
-    font-size: 0.8em;
-  }
-  button {
-    font-size: 1.2em;
-  }
+    body {font-family: sans-serif;display: flex;flex-direction: column;min-height: 100vh;max-width: 70%;min-width: 500px;margin: 0 auto;color: #9baec8;background: #313543;text-align: center}
+    header {margin-top:10px}
+    .box {background-color: #282c37; border-radius:4px;margin-bottom:10px}
+    header h1 {color:white}
+    footer {padding: 10px 0}
+    a {color: #d9e1e8}
+    fieldset {border: none;margin: 2.5em 0}
+    img {max-width: 100px}
+    li {margin-bottom: 0.2em}
+    input, button {width: 300px;font-size: 1.2em}
+    .hint {font-size: 0.8em}
+    input {box-sizing: border-box;font-size: 1em;color: #ffffff;font-family: inherit;background: #131419;border: 1px solid #0a0b0e;border-radius: 4px;padding: 10px}
+    input:focus, input:active {border-color: #79bd9a}
+    button {border: 0;border-radius: 4px;background: #2b90d9;color: #ffffff;text-transform: uppercase;text-align: center;cursor: pointer;padding: 10px 0;font-weight: bold}
+    #out {border-top: 1px solid #393f4f;color:white}
   </style>
 </head>
 <body>
-<h1>Convert an RSS feed to ActivityPub</h1>  
-<p>Put the full RSS feed URL in here, and pick a username for the account that will track the feed.</p>
-<p>
-<input id="feed" type="text" placeholder="https://example.com/feed.xml"/>
-</p>
-<p>
-<input id="username" type="text" placeholder="username"/><br><span class="hint">only letters, digits, and underscore (_) allowed</span>
-</p>
-<button onclick="submit()">Submit</button>
-<div id="out">
-</div>
+  <header class=box>
+    <h1>🐘 Convert an RSS feed to ActivityPub</h1>  
+    <p>Put the full RSS feed URL in here, and pick a username for the account that will track the feed.</p>
+  </header>
+  <article class=box>
+    <fieldset>
+      <p>
+        <input id="feed" type="text" placeholder="https://example.com/feed.xml" required/>
+      </p>
+      <p>
+        <input id="username" type="text" placeholder="username" required/><br><span class="hint">only letters, digits, and underscore (_) allowed</span>
+      </p>
+      <button onclick="submit()">Submit</button>
+    </fieldset>
+    <div id="out">
+    </div>
+  </article>
+  <footer class=box>
+    Created by <a href="https://github.com/dariusk">Darius Kazemi</a>  under mit license, see on <a href="https://github.com/dariusk/activtypub-to-rss">GitHub</a>
+  </footer>
 
 <script>
 // https://bots.tinysubversions.com/api/convert/?feed=https://toomuchnotenough.site/feed.xml&username=tmne

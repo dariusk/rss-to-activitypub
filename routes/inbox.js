@@ -86,8 +86,9 @@ router.post('/', function (req, res) {
         followers = [req.body.actor];
       }
       let followersText = JSON.stringify(followers);
+      console.log('adding followersText', followersText);
       // update into DB
-      db.prepare('update accounts set followers = ? where name = ?').run(`${name}@${domain}`, followersText);
+      db.prepare('update accounts set followers = ? where name = ?').run(followersText, `${name}@${domain}`);
     }
   }
 });

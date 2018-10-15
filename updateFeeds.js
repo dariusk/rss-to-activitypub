@@ -7,11 +7,22 @@ const db = new Database('bot-node.db'),
 
 // get all feeds from DB
 let feeds = db.prepare('select * from feeds').all();
-for (var feed of feeds) {
+console.log('!!!',feeds.length);
+
+let count = 0;
+
+doFeed();
+
+function doFeed() {
+  let feed = feeds[count];
+  if (feed === undefined) {
+    return;
+  }
   // fetch new RSS for each feed
   parser.parseURL(feed.feed, function(err, feedData) {
     if (err) {
       console.log('error fetching', feed.feed, err);
+      doFeed(++count);
     }
     else {
       //console.log(feedData);
@@ -27,14 +38,13 @@ for (var feed of feeds) {
 
       // find the difference of the sets of guids (fall back to title or
       // description since guid is not required by spec) in the old and new feeds
-
       let oldGuidSet = new Set(oldItems.map(el => el.guid || el.title || el.description));
       let newGuidSet = new Set(newItems.map(el => el.guid || el.title || el.description));
       // find things in the new set that aren't in the old set
       let difference = new Set( [...newGuidSet].filter(x => !oldGuidSet.has(x)));
       difference = [...difference];
       
-      //console.log('diff', difference);
+      console.log('diff', feed.feed, difference.length, difference);
 
       if (difference.length > 0) {
         // get a list of new items in the diff
@@ -58,6 +68,10 @@ for (var feed of feeds) {
         // update the DB with new contents
         let content = JSON.stringify(feedData);
         db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run(feed.feed, acct, content);
+        doFeed(++count);
+      }
+      else {
+        doFeed(++count);
       }
     }
   });
@@ -113,7 +127,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
   // get the private key
   console.log('sending to ', name, targetDomain, inbox);
   let inboxFragment = inbox.replace('https://'+targetDomain,'');
-  let result = db.prepare('select privkey from accounts where name = ?').get(name);
+  let result = db.prepare('select privkey from accounts where name = ?').get(`${name}@${domain}`);
   //console.log('got key', result === undefined, `${name}@${domain}`);
   if (result === undefined) {
     console.log(`No record found for ${name}.`);

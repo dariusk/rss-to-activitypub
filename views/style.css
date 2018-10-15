@@ -1,0 +1,23 @@
+body {
+  font-family: sans-serif;
+  max-width: 900px;
+  margin: 30px;
+}
+img {
+  max-width: 100px;
+}
+li {
+  margin-bottom: 0.2em;
+}
+.account {
+}
+input {
+  width: 300px;
+  font-size: 1.2em;
+}
+.hint {
+  font-size: 0.8em;
+}
+button {
+  font-size: 1.2em;
+}

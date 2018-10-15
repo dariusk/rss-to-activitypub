@@ -1,0 +1,7 @@
+{
+  "DOMAIN": "",
+  "PORT_HTTP": "3000",
+  "PORT_HTTPS": "8443",
+  "PRIVKEY_PATH": "",
+  "CERT_PATH": ""
+}

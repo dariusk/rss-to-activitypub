@@ -1,0 +1,4 @@
+node_modules/
+*.db
+package-lock.json
+config.json

@@ -1,0 +1,26 @@
+{
+  "name": "bot-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "better-sqlite3": "^5.0.1",
+    "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "generate-rsa-keypair": "^0.1.2",
+    "pug": "^2.0.3",
+    "request": "^2.87.0",
+    "rss-parser": "^3.4.3"
+  },
+  "engines": {
+    "node": ">=10.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

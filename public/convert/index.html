@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Convert an RSS feed to ActivityPub</title>
+  <style>
+  body {
+    font-family: sans-serif;
+    max-width: 900px;
+    margin: 30px;
+  }
+  img {
+    max-width: 100px;
+  }
+  li {
+    margin-bottom: 0.2em;
+  }
+  .account {
+  }
+  input {
+    width: 300px;
+    font-size: 1.2em;
+  }
+  .hint {
+    font-size: 0.8em;
+  }
+  button {
+    font-size: 1.2em;
+  }
+  </style>
+</head>
+<body>
+<h1>Convert an RSS feed to ActivityPub</h1>  
+<p>Put the full RSS feed URL in here, and pick a username for the account that will track the feed.</p>
+<p>
+<input id="feed" type="text" placeholder="https://example.com/feed.xml"/>
+</p>
+<p>
+<input id="username" type="text" placeholder="username"/><br><span class="hint">only letters, digits, and underscore (_) allowed</span>
+</p>
+<button onclick="submit()">Submit</button>
+<div id="out">
+</div>
+
+<script>
+// https://bots.tinysubversions.com/api/convert/?feed=https://toomuchnotenough.site/feed.xml&username=tmne
+function submit() {
+let feed = document.querySelector('#feed').value;
+let username = document.querySelector('#username').value;
+let out = document.querySelector('#out');
+fetch(`/api/convert/?feed=${feed}&username=${username}`)
+  .then(function(response) {
+    if (response.status !== 200) {
+      out.innerHTML = `<p>Error: ${JSON.stringify(response.statusText)}</p>`;
+      return {};
+    }
+    return response.json();
+  })
+  .then(function(myJson) {
+    console.log((myJson));
+    // a feed exists in the database
+    if (myJson.content) {
+      // was it a match on feed
+      if (myJson.feed === feed) {
+        console.log('feed match!');
+        out.innerHTML = `<p>This feed already exists! Follow @${myJson.username}@bots.tinysubversions.com.</p>`;
+        window.location = `/u/${myJson.username}`;
+      }
+      // was it a match on username
+      else if (myJson.username === username) {
+        console.log('username match!');
+        out.innerHTML = `<p>This username is already taken for <a href="${myJson.feed}">this feed</a>.</p>`;
+      }
+    }
+    else if (myJson.title) {
+      out.innerHTML = `<p>Okay! There is now an ActivityPub actor for ${myJson.title}. You should be able to search for it from your ActivityPub client (Mastodon, Pleroma, etc) using this identifier: @${username}@bots.tinysubversions.com. You won't see anything there until the next time the RSS feed updates. You can check out the profile page for this feed at <a href="https://bots.tinysubversions.com/u/${username}/">https://bots.tinysubversions.com/u/${username}</a> too!</p>`;
+    }
+
+  })
+  .catch(error => {
+    console.log('!!!',error);
+    out.innerHTML = `<p>Error: ${error}</p>`;
+  });
+}
+</script>  
+</body>
+</html>

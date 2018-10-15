@@ -21,7 +21,6 @@ router.get('/:name', function (req, res) {
     else {
       let actor = JSON.parse(result.actor);
       let username = name.replace('@'+domain,'');
-      console.log(username, actor);
       let content = db.prepare('select content from feeds where username = ?').get(username);
       if (content === undefined) {
         return res.status(404).json(`Something went very wrong!`);
@@ -32,7 +31,6 @@ router.get('/:name', function (req, res) {
       if (actor.icon && actor.icon.url) {
         imageUrl = actor.icon.url;
       }
-      console.log(actor, imageUrl);
       res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl });
     }
   }

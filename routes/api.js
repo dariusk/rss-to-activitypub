@@ -2,7 +2,9 @@
 const express = require('express'),
       router = express.Router(),
       crypto = require('crypto'),
+      request = require('request'),
       Parser = require('rss-parser'),
+      parseFavicon = require('parse-favicon').parseFavicon,
       generateRSAKeypair = require('generate-rsa-keypair');
 
 router.get('/convert', function (req, res) {
@@ -40,17 +42,14 @@ router.get('/convert', function (req, res) {
         let domain = req.app.get('domain');
         // create keypair
         var pair = generateRSAKeypair();
-        let imageUrl = null;
-        // if image exists set image
-        if (feedData.image && feedData.image.url) {
-          imageUrl = feedData.image.url;
-        }
-        let actorRecord = createActor(account, domain, pair.public, displayName, imageUrl);
-        let webfingerRecord = createWebfinger(account, domain);
-        const apikey = crypto.randomBytes(16).toString('hex');
-        db.prepare('insert or replace into accounts(name, actor, apikey, pubkey, privkey, webfinger) values(?, ?, ?, ?, ?, ?)').run( `${account}@${domain}`, apikey, pair.public, pair.private, JSON.stringify(actorRecord), JSON.stringify(webfingerRecord));
-        let content = JSON.stringify(feedData);
-        db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run( feed, username, content);
+        getImage(feed, feedData, imageUrl => {
+          let actorRecord = createActor(account, domain, pair.public, displayName, imageUrl);
+          let webfingerRecord = createWebfinger(account, domain);
+          const apikey = crypto.randomBytes(16).toString('hex');
+          db.prepare('insert or replace into accounts(name, actor, apikey, pubkey, privkey, webfinger) values(?, ?, ?, ?, ?, ?)').run( `${account}@${domain}`, JSON.stringify(actorRecord), apikey, pair.public, pair.private, JSON.stringify(webfingerRecord));
+          let content = JSON.stringify(feedData);
+          db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run( feed, username, content);
+        });
       }
     });
   }
@@ -58,6 +57,29 @@ router.get('/convert', function (req, res) {
     res.status(404).json({msg: 'unknown error'});
   }
 });
+
+function getImage(feed, feedData, cb) {
+  let imageUrl = null;
+  // if image exists set image
+  if (feedData.image && feedData.image.url) {
+    imageUrl = feedData.image.url;
+    return cb(imageUrl);
+  }
+  // otherwise parse the HTML for the favicon
+  else {
+    let favUrl = new URL(feed);
+    request(favUrl.origin, (err, resp, body) => {
+      parseFavicon(body, {baseURI: favUrl.origin}).then(result => {
+        if (result && result.length) {
+          return cb(result[0].url);
+        }
+        else {
+          return cb(null);
+        }
+      });
+    });
+  }
+}
 
 function createActor(name, domain, pubkey, displayName, imageUrl) {
   displayName = displayName || name;

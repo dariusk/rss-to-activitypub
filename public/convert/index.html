@@ -46,6 +46,7 @@
 <script>
 // https://bots.tinysubversions.com/api/convert/?feed=https://toomuchnotenough.site/feed.xml&username=tmne
 function submit() {
+let domain = document.domain;
 let feed = document.querySelector('#feed').value;
 let username = document.querySelector('#username').value;
 let out = document.querySelector('#out');
@@ -64,7 +65,7 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
       // was it a match on feed
       if (myJson.feed === feed) {
         console.log('feed match!');
-        out.innerHTML = `<p>This feed already exists! Follow @${myJson.username}@bots.tinysubversions.com.</p>`;
+        out.innerHTML = `<p>This feed already exists! Follow @${myJson.username}@${domain}.</p>`;
         window.location = `/u/${myJson.username}`;
       }
       // was it a match on username
@@ -74,7 +75,7 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
       }
     }
     else if (myJson.title) {
-      out.innerHTML = `<p>Okay! There is now an ActivityPub actor for ${myJson.title}. You should be able to search for it from your ActivityPub client (Mastodon, Pleroma, etc) using this identifier: @${username}@bots.tinysubversions.com. You won't see anything there until the next time the RSS feed updates. You can check out the profile page for this feed at <a href="https://bots.tinysubversions.com/u/${username}/">https://bots.tinysubversions.com/u/${username}</a> too!</p>`;
+      out.innerHTML = `<p>Okay! There is now an ActivityPub actor for ${myJson.title}. You should be able to search for it from your ActivityPub client (Mastodon, Pleroma, etc) using this identifier: @${username}@${domain}. You won't see anything there until the next time the RSS feed updates. You can check out the profile page for this feed at <a href="https://${domain}/u/${username}/">https://${domain}/u/${username}</a> too!</p>`;
     }
 
   })

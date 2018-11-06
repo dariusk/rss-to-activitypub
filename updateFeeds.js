@@ -1,3 +1,5 @@
+const config = require('./config.json');
+const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
 const Database = require('better-sqlite3');
 const db = new Database('bot-node.db'),
       Parser = require('rss-parser'),
@@ -50,7 +52,7 @@ function doFeed() {
         // get a list of new items in the diff
         let brandNewItems = newItems.filter(el => difference.includes(el.guid) || difference.includes(el.title) || difference.includes(el.description));
         let acct = feed.username;
-        let domain = 'bots.tinysubversions.com';
+        let domain = DOMAIN;
         //console.log(acct, brandNewItems);
 
         // send the message to everyone for each item!
@@ -197,10 +199,10 @@ function createMessage(text, name, domain, item) {
 
 function sendCreateMessage(text, name, domain, req, res, item) {
   let message = createMessage(text, name, domain, item);
-
+  // console.log(`${name}@${domain}`);
   let result = db.prepare('select followers from accounts where name = ?').get(`${name}@${domain}`);
   let followers = JSON.parse(result.followers);
-  //console.log(followers);
+  // console.log(followers);
   if (!followers) {
     followers = [];
   }

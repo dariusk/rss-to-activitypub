@@ -15,7 +15,7 @@ router.get('/:name', function (req, res) {
     if (result === undefined) {
       return res.status(404).json(`No record found for ${name}.`);
     }
-    else if (req.headers.accept.includes('application/activity+json') || req.headers.accept.includes('application/json') || req.headers.accept.includes('application/json+ld')) {
+    else if (req.headers.accept && (req.headers.accept.includes('application/activity+json') || req.headers.accept.includes('application/json') || req.headers.accept.includes('application/json+ld'))) {
       res.json(JSON.parse(result.actor));
     }
     else {

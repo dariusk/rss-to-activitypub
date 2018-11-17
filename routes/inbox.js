@@ -57,7 +57,7 @@ router.post('/', function (req, res) {
   let domain = req.app.get('domain');
   const myURL = new URL(req.body.actor);
   let targetDomain = myURL.hostname;
-  fs.appendFile('/home/dariusk/bot-node/inbox.log', JSON.stringify(req.body)+'\r\n', function (err) {
+  fs.appendFile('./inbox.log', JSON.stringify(req.body)+'\r\n', function (err) {
      if (err) {
        return console.log(err);
      }

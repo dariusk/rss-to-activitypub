@@ -36,6 +36,7 @@ router.get('/convert', function (req, res) {
         console.log('end!!!!');
         res.status(200).json(feedData);
         let displayName = feedData.title;
+        let description = feedData.description;
         let account = username;
         // create new user
         let db = req.app.get('db');
@@ -43,7 +44,7 @@ router.get('/convert', function (req, res) {
         // create keypair
         var pair = generateRSAKeypair();
         getImage(feed, feedData, imageUrl => {
-          let actorRecord = createActor(account, domain, pair.public, displayName, imageUrl);
+          let actorRecord = createActor(account, domain, pair.public, displayName, imageUrl, description);
           let webfingerRecord = createWebfinger(account, domain);
           const apikey = crypto.randomBytes(16).toString('hex');
           db.prepare('insert or replace into accounts(name, actor, apikey, pubkey, privkey, webfinger) values(?, ?, ?, ?, ?, ?)').run( `${account}@${domain}`, JSON.stringify(actorRecord), apikey, pair.public, pair.private, JSON.stringify(webfingerRecord));
@@ -81,7 +82,7 @@ function getImage(feed, feedData, cb) {
   }
 }
 
-function createActor(name, domain, pubkey, displayName, imageUrl) {
+function createActor(name, domain, pubkey, displayName, imageUrl, description) {
   displayName = displayName || name;
   let actor =  {
     '@context': [
@@ -106,6 +107,9 @@ function createActor(name, domain, pubkey, displayName, imageUrl) {
       'mediaType': 'image/png',
       'url': imageUrl,
     };
+  }
+  if (description) {
+    actor.summary = `<p>${description}</p>`;
   }
   return actor;
 }

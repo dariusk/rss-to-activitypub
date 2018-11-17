@@ -7,8 +7,9 @@ html
   body
     h1= displayName
     img(src=imageUrl)
-    p.account #{accountName}
-    p What you're looking at is an RSS feed that's been converted into an account that Mastodon (or any other ActivityPub social network) can subscribe to. Put the username above into your user search and you should be able to find this feed and subscribe!
+    h3.account #{accountName}
+    p #{description}
+    p <strong><em>What you're looking at is an RSS feed that's been converted into an account that Mastodon (or any other ActivityPub social network) can subscribe to. Put the username above into your user search and you should be able to find this feed and subscribe!</em></strong>
     h2 Feed items
     ul
       for item in items

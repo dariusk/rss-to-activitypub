@@ -31,7 +31,11 @@ router.get('/:name', function (req, res) {
       if (actor.icon && actor.icon.url) {
         imageUrl = actor.icon.url;
       }
-      res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl });
+      let description = null;
+      if (actor.summary) {
+        description = actor.summary;
+      }
+      res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl, description });
     }
   }
 });

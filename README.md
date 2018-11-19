@@ -2,6 +2,8 @@
 
 This is a server that lets users convert any RSS feed to an ActivityPub actor that can be followed by users on ActivityPub-compliant social networks like Mastodon. For a demo of this in action, see https://bots.tinysubversions.com/convert/
 
+This is based on my [Express ActivityPub Server](https://github.com/dariusk/express-activitypub), a simple Node/Express server that supports a subset of ActivityPub.
+
 ## Requirements
 
 This requires Node.js v10.10.0 or above.
@@ -52,7 +54,13 @@ Then make sure to manually run `updateFeed.js` when the feed changes. I recommen
 
 ## Database
 
-This server uses a SQLite database to keep track of all the data. There are two tables in the database: `accounts` and `feeds`.
+This server uses a SQLite database stored in the file `bot-node.db` to keep track of all the data. To connect directly to the database for debugging, from the root directory of the project, run:
+
+```bash
+sqlite3 bot-node.db
+```
+
+There are two tables in the database: `accounts` and `feeds`.
 
 ### `accounts`
 

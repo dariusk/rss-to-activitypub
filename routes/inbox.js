@@ -55,6 +55,9 @@ function sendAcceptMessage(thebody, name, domain, req, res, targetDomain) {
 router.post('/', function (req, res) {
   // pass in a name for an account, if the account doesn't exist, create it!
   let domain = req.app.get('domain');
+  if (req.body.actor === undefined) {
+    return res.status(400).send(`No actor specified.`);
+  }
   const myURL = new URL(req.body.actor);
   let targetDomain = myURL.hostname;
   fs.appendFile('./inbox.log', JSON.stringify(req.body)+'\r\n', function (err) {
@@ -76,8 +79,8 @@ router.post('/', function (req, res) {
     else {
       // update followers
       let followers = result.followers;
-      console.log(followers);
       if (followers) {
+        followers = JSON.parse(followers);
         followers.push(req.body.actor);
         // unique items
         followers = [...new Set(followers)];

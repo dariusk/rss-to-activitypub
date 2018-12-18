@@ -9,6 +9,7 @@ const db = new Database('bot-node.db'),
 
 // get all feeds from DB
 let feeds = db.prepare('select * from feeds').all();
+
 console.log('!!!',feeds.length);
 
 let count = 0;
@@ -81,10 +82,10 @@ function doFeed() {
 
 // TODO: update the display name of a feed if the feed title has changed
 
-// This is a function with a bunch of custom rules for different kinds of content I've found in the wild in things like Reddit rss feeds
+// This is a function with a bunch of custom rules for different kinds of content I've found in the wild in things like Reddit rss feeds. Right now we just use the first image we find, if any.
 function transformContent(item) {
   let cheerio = require('cheerio');
-  //console.log(item.content);
+  console.log(JSON.stringify(item));
   if (item.content === undefined) {
     item.urls = [];
     return item;
@@ -103,10 +104,23 @@ function transformContent(item) {
       urls.push(url);
     }
   });
+  let images = $('img');
+  images.each((i,e) => {
+    console.log(i,e);
+    let url = $(e).attr('src');
+    // if there's an image, add it as a media attachment
+    if (url && url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
+      //console.log(url);
+      urls.push(url);
+      // remove the image from the post body since it's in the attachment now
+      $(e).remove();
+    }
+  });
+
   item.urls = urls;
 
   // remove multiple line breaks
-  $('br+br+br').remove();
+  $('br').remove();
   $('p').each((i, el) => {
     if($(el).html().replace(/\s|&nbsp;/g, '').length === 0) {$(el).remove();}
   });
@@ -117,7 +131,9 @@ function transformContent(item) {
     $(el).replaceWith(`<span>- ${$(el).html()}</span><br>`);
   });
 
-  item.content = $('body').html();
+  // couple of hacky regexes to make sure we clean up everything
+  item.content = $('body').html().replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
+  item.content = item.content.replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
   return item;
 }
 

@@ -18,6 +18,7 @@ doFeed();
 
 function doFeed() {
   let feed = feeds[count];
+  console.log(count, feed.feed);
   if (feed === undefined) {
     return;
   }
@@ -71,10 +72,12 @@ function doFeed() {
         // update the DB with new contents
         let content = JSON.stringify(feedData);
         db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run(feed.feed, acct, content);
-        doFeed(++count);
+        count = count + 1;
+        setTimeout(doFeed, 100);
       }
       else {
-        doFeed(++count);
+        count = count + 1;
+        setTimeout(doFeed, 100);
       }
     }
   });
@@ -123,12 +126,6 @@ function transformContent(item) {
   $('br').remove();
   $('p').each((i, el) => {
     if($(el).html().replace(/\s|&nbsp;/g, '').length === 0) {$(el).remove();}
-  });
-
-  // convert li items to bullet points
-  $('li').each((i, el) => {
-    //console.log($(el).html());
-    $(el).replaceWith(`<span>- ${$(el).html()}</span><br>`);
   });
 
   // couple of hacky regexes to make sure we clean up everything
@@ -193,7 +190,7 @@ function createMessage(text, name, domain, item) {
       'published': d.toISOString(),
       'attributedTo': `https://${domain}/u/${name}`,
       'content': text,
-      'to': 'https://www.w3.org/ns/activitystreams#Public'
+      'cc': 'https://www.w3.org/ns/activitystreams#Public'
     }
   };
 

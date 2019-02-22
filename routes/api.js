@@ -29,6 +29,9 @@ router.get('/convert', function (req, res) {
     let parser = new Parser();
     parser.parseURL(feed, function(err, feedData) {
       if (err) {
+        if (err.message === 'Status code 400') {
+          err.message = `That doesn't look like a valid RSS feed. Check <a href="${feed}">the URL you provided</a> in a feed validator. You can <a href="https://validator.w3.org/feed/check.cgi?url=${feed}" target="_blank">click here</a> to pop up a test immediately.`
+        }
         res.status(400).json({err: err.message});
       }
       else {

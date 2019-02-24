@@ -2,6 +2,7 @@ body {
   font-family: sans-serif;
   max-width: 900px;
   margin: 30px;
+  line-height: 1.3em;
 }
 img {
   max-width: 100px;

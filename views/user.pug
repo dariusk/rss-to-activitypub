@@ -5,11 +5,12 @@ html
     style
       include style.css
   body
+    <a href="/">&larr; RSS to ActivityPub Converter</a>
     h1= displayName
     img(src=imageUrl)
     h3.account #{accountName}
     p #{description}
-    p <strong><em>What you're looking at is an RSS feed that's been converted into an account that Mastodon (or any other ActivityPub social network) can subscribe to. Put the username above into your user search and you should be able to find this feed and subscribe!</em></strong>
+    p <strong><em>What you're looking at is an RSS feed that's been converted into an account that Mastodon (or any other ActivityPub social network) can subscribe to. Put the username above into your user search and you should be able to find this feed and subscribe! <a href="/convert/">Click here to make an ActivityPub account for your favorite RSS feeds</a>.</em></strong>
     h2 Feed items
     ul
       for item in items

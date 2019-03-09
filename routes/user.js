@@ -21,11 +21,12 @@ router.get('/:name', function (req, res) {
     else {
       let actor = JSON.parse(result.actor);
       let username = name.replace('@'+domain,'');
-      let content = db.prepare('select content from feeds where username = ?').get(username);
-      if (content === undefined) {
+      let resultFeed = db.prepare('select content, feed from feeds where username = ?').get(username);
+      if (resultFeed === undefined) {
         return res.status(404).json(`Something went very wrong!`);
       }
-      let feedData = JSON.parse(content.content);
+      let feedData = JSON.parse(resultFeed.content);
+      let feedUrl = resultFeed.feed;
       let imageUrl = null;
       // if image exists set image
       if (actor.icon && actor.icon.url) {
@@ -35,7 +36,7 @@ router.get('/:name', function (req, res) {
       if (actor.summary) {
         description = actor.summary;
       }
-      res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl, description });
+      res.render('user', { displayName: actor.name, items: feedData.items, accountName: '@'+name, imageUrl: imageUrl, description, feedUrl });
     }
   }
 });

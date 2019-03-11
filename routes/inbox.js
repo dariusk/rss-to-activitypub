@@ -6,6 +6,9 @@ const express = require('express'),
       router = express.Router();
 
 function signAndSend(message, name, domain, req, res, targetDomain) {
+  // get the URI of the actor object and append 'inbox' to it
+  let inbox = message.object.actor+'/inbox';
+  let inboxFragment = inbox.replace('https://'+targetDomain,'');
   // get the private key
   let db = req.app.get('db');
   let result = db.prepare('select privkey from accounts where name = ?').get(`${name}@${domain}`);
@@ -16,15 +19,16 @@ function signAndSend(message, name, domain, req, res, targetDomain) {
     let privkey = result.privkey;
     const signer = crypto.createSign('sha256');
     let d = new Date();
-    let stringToSign = `(request-target): post /inbox\nhost: ${targetDomain}\ndate: ${d.toUTCString()}`;
+    let stringToSign = `(request-target): post ${inboxFragment}\nhost: ${targetDomain}\ndate: ${d.toUTCString()}`;
     signer.update(stringToSign);
     signer.end();
     const signature = signer.sign(privkey);
     const signature_b64 = signature.toString('base64');
     let header = `keyId="https://${domain}/u/${name}",headers="(request-target) host date",signature="${signature_b64}"`;
     console.log('signature:',header);
+    console.log('message:',message);
     request({
-      url: `https://${targetDomain}/inbox`,
+      url: inbox,
       headers: {
         'Host': targetDomain,
         'Date': d.toUTCString(),

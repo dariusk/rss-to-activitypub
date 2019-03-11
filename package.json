@@ -13,7 +13,7 @@
     "parse-favicon": "^2.0.0",
     "pug": "^2.0.3",
     "request": "^2.87.0",
-    "rss-parser": "^3.4.3"
+    "rss-parser": "^3.6.3"
   },
   "engines": {
     "node": ">=10.10.0"

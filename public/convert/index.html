@@ -49,7 +49,7 @@
 // https://bots.tinysubversions.com/api/convert/?feed=https://toomuchnotenough.site/feed.xml&username=tmne
 function submit() {
 let domain = document.domain;
-let feed = document.querySelector('#feed').value;
+let feed = encodeURIComponent(document.querySelector('#feed').value);
 let username = document.querySelector('#username').value;
 let out = document.querySelector('#out');
 fetch(`/api/convert/?feed=${feed}&username=${username}`)

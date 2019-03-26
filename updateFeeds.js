@@ -173,7 +173,7 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
   }
 }
 
-function createMessage(text, name, domain, item) {
+function createMessage(text, name, domain, item, follower) {
   const guid = crypto.randomBytes(16).toString('hex');
   let d = new Date();
 
@@ -183,6 +183,8 @@ function createMessage(text, name, domain, item) {
     'id': `https://${domain}/${guid}`,
     'type': 'Create',
     'actor': `https://${domain}/u/${name}`,
+
+    'to': [ follower ],
 
     'object': {
       'id': `https://${domain}/${guid}`,
@@ -196,8 +198,8 @@ function createMessage(text, name, domain, item) {
 
   // add image attachment
   let attachment;
+  console.log('NUM IMAGES',item.urls.length);
   if (item.urls.length > 0) {
-    //console.log('appending');
     attachment = {
       'type': 'Document',
       'mediaType': 'image/png', // TODO: update the mediaType to match jpeg,gif,etc
@@ -206,12 +208,24 @@ function createMessage(text, name, domain, item) {
     };
     out.object.attachment = attachment;
   }
+  else if (item.urls.length > 1) {
+    attachment = [];
+    let lengthFourMax = Math.min(item.urls.length, 4);
+    for (var i=0; i<lengthFourMax; i++) {
+      attachment.push({
+        'type': 'Document',
+        'mediaType': 'image/png', // TODO: update the mediaType to match jpeg,gif,etc
+        'url': item.urls[i],
+        'name': null
+      });
+    }
+    out.object.attachment = attachment;
+  }
 
   return out;
 }
 
 function sendCreateMessage(text, name, domain, req, res, item) {
-  let message = createMessage(text, name, domain, item);
   // console.log(`${name}@${domain}`);
   let result = db.prepare('select followers from accounts where name = ?').get(`${name}@${domain}`);
   let followers = JSON.parse(result.followers);
@@ -223,6 +237,7 @@ function sendCreateMessage(text, name, domain, req, res, item) {
     let inbox = follower+'/inbox';
     let myURL = new URL(follower);
     let targetDomain = myURL.hostname;
+    let message = createMessage(text, name, domain, item, follower);
     signAndSend(message, name, domain, req, res, targetDomain, inbox);
   }
 }

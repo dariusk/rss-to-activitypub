@@ -2,7 +2,8 @@
 
 module.exports = {
   api: require('./api'),
-  user: require('./user'),
   inbox: require('./inbox'),
+  message: require('./message'),
+  user: require('./user'),
   webfinger: require('./webfinger'),
 };

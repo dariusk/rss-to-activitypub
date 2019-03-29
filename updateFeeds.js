@@ -173,25 +173,26 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
   }
 }
 
-function createMessage(text, name, domain, item, follower) {
-  const guid = crypto.randomBytes(16).toString('hex');
+function createMessage(text, name, domain, item, follower, guidNote) {
+  const guidCreate = crypto.randomBytes(16).toString('hex');
   let d = new Date();
 
   let out = {
     '@context': 'https://www.w3.org/ns/activitystreams',
 
-    'id': `https://${domain}/${guid}`,
+    'id': `https://${domain}/m/${guidCreate}`,
     'type': 'Create',
     'actor': `https://${domain}/u/${name}`,
 
     'to': [ follower ],
 
     'object': {
-      'id': `https://${domain}/${guid}`,
+      'id': `https://${domain}/m/${guidNote}`,
       'type': 'Note',
       'published': d.toISOString(),
       'attributedTo': `https://${domain}/u/${name}`,
       'content': text,
+      'link': item.link,
       'cc': 'https://www.w3.org/ns/activitystreams#Public'
     }
   };
@@ -222,6 +223,10 @@ function createMessage(text, name, domain, item, follower) {
     out.object.attachment = attachment;
   }
 
+  console.log(guidCreate, guidNote);
+  db.prepare('insert or replace into messages(guid, message) values(?, ?)').run( guidCreate, JSON.stringify(out));
+  db.prepare('insert or replace into messages(guid, message) values(?, ?)').run( guidNote, JSON.stringify(out.object));
+
   return out;
 }
 
@@ -237,7 +242,8 @@ function sendCreateMessage(text, name, domain, req, res, item) {
     let inbox = follower+'/inbox';
     let myURL = new URL(follower);
     let targetDomain = myURL.hostname;
-    let message = createMessage(text, name, domain, item, follower);
+    const guidNote = crypto.randomBytes(16).toString('hex');
+    let message = createMessage(text, name, domain, item, follower, guidNote);
     signAndSend(message, name, domain, req, res, targetDomain, inbox);
   }
 }

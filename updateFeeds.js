@@ -234,6 +234,7 @@ function sendCreateMessage(text, name, domain, req, res, item) {
   // console.log(`${name}@${domain}`);
   let result = db.prepare('select followers from accounts where name = ?').get(`${name}@${domain}`);
   let followers = JSON.parse(result.followers);
+  const guidNote = crypto.randomBytes(16).toString('hex');
   // console.log(followers);
   if (!followers) {
     followers = [];
@@ -242,7 +243,6 @@ function sendCreateMessage(text, name, domain, req, res, item) {
     let inbox = follower+'/inbox';
     let myURL = new URL(follower);
     let targetDomain = myURL.hostname;
-    const guidNote = crypto.randomBytes(16).toString('hex');
     let message = createMessage(text, name, domain, item, follower, guidNote);
     signAndSend(message, name, domain, req, res, targetDomain, inbox);
   }

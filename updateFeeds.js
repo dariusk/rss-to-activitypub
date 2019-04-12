@@ -62,7 +62,7 @@ function doFeed() {
           // FIX THIS
           item = transformContent(item);
           //console.log(item.urls);
-          let message = `<p><a href="${item.link}">${item.title}</a></p><p>${item.content}</p>`;
+          let message = `<p><a href="${item.link}">${item.title}</a></p><p>${item.content || ''}</p>`;
           if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
             message += `<p><a href="${item.enclosure.url}">${item.enclosure.url}</a></p>`;
           }

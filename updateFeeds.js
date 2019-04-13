@@ -5,7 +5,7 @@ const db = new Database('bot-node.db'),
       Parser = require('rss-parser'),
       request = require('request'),
       crypto = require('crypto'),
-      parser = new Parser();
+      parser = new Parser({timeout: 2000});
 
 // get all feeds from DB
 let feeds = db.prepare('select * from feeds').all();

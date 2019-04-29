@@ -7,29 +7,37 @@ const db = new Database('bot-node.db'),
       crypto = require('crypto'),
       parser = new Parser({timeout: 2000});
 
-// get all feeds from DB
-let feeds = db.prepare('select * from feeds').all();
+const Jackd = require('jackd');
+const beanstalkd = new Jackd();
 
-console.log('!!!',feeds.length);
+beanstalkd.connect()
 
-let count = 0;
-
-doFeed();
-
-function doFeed() {
-  let feed = feeds[count];
-  console.log(count, feed.feed);
-  if (feed === undefined) {
-    return;
+async function foo() {
+  while (true) {
+    try {
+      const { id, payload } = await beanstalkd.reserve()
+      console.log(payload)
+      /* ... process job here ... */
+      await doFeed(payload)
+      await beanstalkd.delete(id)
+    } catch (err) {
+      // Log error somehow
+      console.error(err)
+    }
   }
+}
+
+foo()
+
+function doFeed(feedUrl) {
+return new Promise((resolve, reject) => {
   // fetch new RSS for each feed
-  parser.parseURL(feed.feed, function(err, feedData) {
+  parser.parseURL(feedUrl, function(err, feedData) {
     if (err) {
-      console.log('error fetching', feed.feed, err);
-      doFeed(++count);
+      reject('error fetching ' + feedUrl + '; ' + err);
     }
     else {
-      //console.log(feedData);
+      let feed = db.prepare('select * from feeds where feed = ?').get(feedUrl);
       // get the old feed data from the database
       let oldFeed = JSON.parse(feed.content);
 
@@ -72,15 +80,14 @@ function doFeed() {
         // update the DB with new contents
         let content = JSON.stringify(feedData);
         db.prepare('insert or replace into feeds(feed, username, content) values(?, ?, ?)').run(feed.feed, acct, content);
-        count = count + 1;
-        setTimeout(doFeed, 100);
+        return resolve('done with ' + feedUrl)
       }
       else {
-        count = count + 1;
-        setTimeout(doFeed, 100);
+        return resolve('done with ' + feedUrl + ', no change')
       }
     }
   });
+}).catch((e) => console.log(e));
 }
 
 // TODO: update the display name of a feed if the feed title has changed

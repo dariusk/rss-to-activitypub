@@ -95,7 +95,7 @@ function transformContent(item) {
   }
   let $ = cheerio.load(item.content);
 
-  // look through all the links
+  // look through all the links to find images
   let links = $('a');
   let urls = [];
   //console.log('links', links.length);
@@ -107,9 +107,10 @@ function transformContent(item) {
       urls.push(url);
     }
   });
+
+  // look through all the images
   let images = $('img');
   images.each((i,e) => {
-    console.log(i,e);
     let url = $(e).attr('src');
     // if there's an image, add it as a media attachment
     if (url && url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
@@ -122,8 +123,17 @@ function transformContent(item) {
 
   item.urls = urls;
 
+  // find iframe embeds and turn them into links
+  let iframes = $('iframe');
+  iframes.each((i,e) => {
+    console.log('iframe',i,e);
+    let url = $(e).attr('src');
+    $(e).replaceWith($(`<a href="${url}">[embedded content]</a>`));
+  });
+
+
   // remove multiple line breaks
-  $('br').remove();
+  //$('br').remove();
   $('p').each((i, el) => {
     if($(el).html().replace(/\s|&nbsp;/g, '').length === 0) {$(el).remove();}
   });
@@ -131,6 +141,8 @@ function transformContent(item) {
   // couple of hacky regexes to make sure we clean up everything
   item.content = $('body').html().replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
   item.content = item.content.replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
+  // remove whitespace nodes from in between paragraphs
+  item.content = item.content.replace(/p>\s<p/g,'p><p');
   return item;
 }
 

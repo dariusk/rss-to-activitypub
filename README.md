@@ -8,6 +8,8 @@ This is based on my [Express ActivityPub Server](https://github.com/dariusk/expr
 
 This requires Node.js v10.10.0 or above.
 
+You also need `beanstalkd` running. This is a simple and fast queueing system we use to manage polling RSS feeds. [Here are installation instructions](https://beanstalkd.github.io/download.html). On a production server you'll want to [install it as a background process](https://github.com/beanstalkd/beanstalkd/tree/master/adm).
+
 ## Installation
 
 Clone the repository, then `cd` into its root directory. Install dependencies:
@@ -44,7 +46,7 @@ Go to `https://whateveryourdomainis.com:3000/convert` or whatever port you selec
 
 ## Sending out updates to followers
 
-There is also a file called `updateFeeds.js` that needs to be run on a cron job or similar scheduler. I like to run mine once a minute. It queries every RSS feed in the database to see if there has been a change to the feed. If there is a new post, it sends out the new post to everyone subscribed to its corresponding ActivityPub Actor.
+There is also a file called `queueFeeds.js` that needs to be run on a cron job or similar scheduler. I like to run mine once a minute. It queries every RSS feed in the database to see if there has been a change to the feed. If there is a new post, it sends out the new post to everyone subscribed to its corresponding ActivityPub Actor.
 
 ## Local testing
 

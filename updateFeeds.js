@@ -18,8 +18,8 @@ async function foo() {
       const { id, payload } = await beanstalkd.reserve()
       console.log(payload)
       /* ... process job here ... */
-      await doFeed(payload)
       await beanstalkd.delete(id)
+      await doFeed(payload)
     } catch (err) {
       // Log error somehow
       console.error(err)
@@ -136,8 +136,8 @@ function transformContent(item) {
   });
 
   // couple of hacky regexes to make sure we clean up everything
-  item.content = $('body').html().replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
-  item.content = item.content.replace(/^(\n|\r)/,'').replace(/>\r+</,' ').replace(/  +/g, '');
+  item.content = $('body').html().replace(/^(\n|\r)/,'').replace(/>\r+</,'><').replace(/  +/g, '');
+  item.content = item.content.replace(/^(\n|\r)/,'').replace(/>\r+</,'><').replace(/>\s*</g,'><').replace(/>\u200B+</g,'><').replace(/  +/g, '').replace(/<p><\/p>/g,'');
   return item;
 }
 

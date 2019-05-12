@@ -70,7 +70,7 @@ return new Promise((resolve, reject) => {
           // FIX THIS
           item = transformContent(item);
           //console.log(item.urls);
-          let message = `<p><a href="${item.link}">${item.title}</a></p><p>${item.content || ''}</p>`;
+          let message = `<p><a href="${item.link}">${item.title}</a></p>${item.content || ''}`;
           if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
             message += `<p><a href="${item.enclosure.url}">${item.enclosure.url}</a></p>`;
           }
@@ -146,8 +146,8 @@ function transformContent(item) {
   });
 
   // couple of hacky regexes to make sure we clean up everything
-  item.content = $('body').html().replace(/^(\n|\r)/,'').replace(/>\r+</,'><').replace(/  +/g, '');
-  item.content = item.content.replace(/^(\n|\r)/,'').replace(/>\r+</,'><').replace(/>\s*</g,'><').replace(/>\u200B+</g,'><').replace(/  +/g, '').replace(/<p><\/p>/g,'');
+  item.content = $('body').html().replace(/^(\n|\r)/g,'').replace(/>\r+</g,'><').replace(/  +/g, '');
+  item.content = item.content.replace(/^(\n|\r)/g,'').replace(/>\r+</g,'><').replace(/>\s*</g,'><').replace(/&#x200B;/g,'').replace(/>\u200B+</g,'><').replace(/  +/g, '').replace(/<p><\/p>/g,'').replace(/(<br\/?>)+/g,'<br>');
   return item;
 }
 

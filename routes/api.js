@@ -92,9 +92,8 @@ function createActor(name, domain, pubkey, displayName, imageUrl, description) {
       'https://www.w3.org/ns/activitystreams',
       'https://w3id.org/security/v1'
     ],
-
     'id': `https://${domain}/u/${name}`,
-    'type': 'Person',
+    'type': 'Service',
     'preferredUsername': `${name}`,
     'inbox': `https://${domain}/api/inbox`,
     'followers': `https://${domain}/u/${name}/followers`,

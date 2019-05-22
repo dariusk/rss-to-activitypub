@@ -31,7 +31,7 @@
   </style>
 </head>
 <body>
-<h1>Convert an RSS feed to ActivityPub</h1>  
+<h1>Convert an RSS feed to ActivityPub</h1>
 <p><em>by <a href="https://friend.camp/@darius">Darius Kazemi</a>, <a href="https://github.com/dariusk/rss-to-activitypub">source code here</a></em></p>
 <p>Put the full RSS feed URL in here, and pick a username for the account that will track the feed.</p>
 <p>
@@ -64,7 +64,7 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
     // a feed exists in the database
     if (myJson.content) {
       // was it a match on feed
-      if (myJson.feed === feed) {
+      if (myJson.feed === decodeURIComponent(feed)) {
         console.log('feed match!');
         out.innerHTML = `<p>This feed already exists! Follow @${myJson.username}@${domain}.</p>`;
         window.location = `/u/${myJson.username}`;
@@ -85,6 +85,6 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
     out.innerHTML = `<p>Error: ${error}</p>`;
   });
 }
-</script>  
+</script>
 </body>
 </html>

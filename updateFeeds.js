@@ -120,7 +120,7 @@ function transformContent(item) {
   images.each((i,e) => {
     let url = $(e).attr('src');
     // if there's an image, add it as a media attachment
-    if (url && url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
+    if (url) {
       //console.log(url);
       urls.push(url);
       // remove the image from the post body since it's in the attachment now

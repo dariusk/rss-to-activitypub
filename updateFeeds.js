@@ -67,10 +67,16 @@ return new Promise((resolve, reject) => {
 
         // send the message to everyone for each item!
         for (var item of brandNewItems) {
-          // FIX THIS
           item = transformContent(item);
-          //console.log(item.urls);
-          let message = `<p><a href="${item.link}">${item.title}</a></p>${item.content || ''}`;
+
+          let message;
+          if(item.link.match('/twitter.com/')) {
+             message = `${item.content}`;
+          }
+          else {
+             message = `<p><a href="${item.link}">${item.title}</a></p><p>${item.content || ''}</p>`;
+          }
+
           if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
             message += `<p><a href="${item.enclosure.url}">${item.enclosure.url}</a></p>`;
           }

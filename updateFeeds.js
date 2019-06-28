@@ -223,7 +223,16 @@ function createMessage(text, name, domain, item, follower, guidNote) {
   // add image attachment
   let attachment;
   console.log('NUM IMAGES',item.urls.length);
-  if (item.urls.length > 0) {
+  if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
+    attachment = {
+      'type': 'Document',
+      'mediaType': 'audio/mpeg',
+      'url': item.enclosure.url,
+      'name': null
+    };
+    out.object.attachment = attachment;
+  }
+  else if (item.urls.length > 0) {
     attachment = {
       'type': 'Document',
       'mediaType': 'image/png', // TODO: update the mediaType to match jpeg,gif,etc

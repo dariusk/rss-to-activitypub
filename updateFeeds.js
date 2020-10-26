@@ -191,7 +191,9 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
         'Host': targetDomain,
         'Date': d.toUTCString(),
         'Signature': header,
-        'Digest': `SHA-256=${digest}`
+        'Digest': `SHA-256=${digest}`,
+        'Content-Type': 'application/activity+json',
+        'Accept': 'application/activity+json'
       },
       method: 'POST',
       json: true,

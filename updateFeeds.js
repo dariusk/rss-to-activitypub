@@ -182,7 +182,8 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
     signer.end();
     const signature = signer.sign(privkey);
     const signature_b64 = signature.toString('base64');
-    let header = `keyId="https://${domain}/u/${name}",headers="(request-target) host date digest",signature="${signature_b64}"`;
+    const algorithm = 'rsa-sha256';
+    let header = `keyId="https://${domain}/u/${name}",algorithm="${algorithm}",headers="(request-target) host date digest",signature="${signature_b64}"`;
     //console.log('signature:',header);
     request({
       url: inbox,

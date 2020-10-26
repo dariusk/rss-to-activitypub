@@ -171,22 +171,26 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
     console.log(`No record found for ${name}.`);
   }
   else {
+    // digest
+    const digest = crypto.createHash('sha256').update(JSON.stringify(message)).digest('base64');
+
     let privkey = result.privkey;
     const signer = crypto.createSign('sha256');
     let d = new Date();
-    let stringToSign = `(request-target): post ${inboxFragment}\nhost: ${targetDomain}\ndate: ${d.toUTCString()}`;
+    let stringToSign = `(request-target): post ${inboxFragment}\nhost: ${targetDomain}\ndate: ${d.toUTCString()}\ndigest: SHA-256=${digest}`;
     signer.update(stringToSign);
     signer.end();
     const signature = signer.sign(privkey);
     const signature_b64 = signature.toString('base64');
-    let header = `keyId="https://${domain}/u/${name}",headers="(request-target) host date",signature="${signature_b64}"`;
+    let header = `keyId="https://${domain}/u/${name}",headers="(request-target) host date digest",signature="${signature_b64}"`;
     //console.log('signature:',header);
     request({
       url: inbox,
       headers: {
         'Host': targetDomain,
         'Date': d.toUTCString(),
-        'Signature': header
+        'Signature': header,
+        'Digest': `SHA-256=${digest}`
       },
       method: 'POST',
       json: true,
@@ -201,8 +205,7 @@ function createMessage(text, name, domain, item, follower, guidNote) {
   let d = new Date();
 
   let out = {
-    '@context': 'https://www.w3.org/ns/activitystreams',
-
+    '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
     'id': `https://${domain}/m/${guidCreate}`,
     'type': 'Create',
     'actor': `https://${domain}/u/${name}`,

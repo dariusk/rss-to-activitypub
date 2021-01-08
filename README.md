@@ -1,6 +1,6 @@
 # RSS to ActivityPub Converter
 
-This is a server that lets users convert any RSS feed to an ActivityPub actor that can be followed by users on ActivityPub-compliant social networks like Mastodon. For a demo of this in action, see https://bots.tinysubversions.com/convert/
+This is a server that lets users convert any RSS feed to an ActivityPub actor that can be followed by users on ActivityPub-compliant social networks like Mastodon.
 
 This is based on my [Express ActivityPub Server](https://github.com/dariusk/express-activitypub), a simple Node/Express server that supports a subset of ActivityPub.
 

@@ -10,7 +10,7 @@ const db = new Database('data/bot-node.db'),
 const Jackd = require('jackd');
 const beanstalkd = new Jackd();
 
-beanstalkd.connect({beanstalkd,11300 })
+beanstalkd.connect({host: 'beanstalkd',port: 11300})
 
 async function foo() {
   while (true) {

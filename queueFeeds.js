@@ -14,7 +14,7 @@ async function foo() {
 
   let count = 0;
 
-  await beanstalkd.connect({beanstalkd,11300 })
+  await beanstalkd.connect({host: 'beanstalkd', port: 11300 })
 
   for (feed of feeds) {
     await beanstalkd.put(feed.feed)

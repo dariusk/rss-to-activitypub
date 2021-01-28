@@ -1,7 +1,7 @@
 const config = require('./config.json');
 const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
 const Database = require('better-sqlite3');
-const db = new Database('bot-node.db'),
+const db = new Database('data/bot-node.db'),
       Parser = require('rss-parser'),
       request = require('request'),
       crypto = require('crypto'),

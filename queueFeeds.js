@@ -4,6 +4,7 @@ const Jackd = require('jackd');
 const beanstalkd = new Jackd();
 
 
+
 async function foo() {
 
   // get all feeds from DB
@@ -13,7 +14,7 @@ async function foo() {
 
   let count = 0;
 
-  await beanstalkd.connect()
+  await beanstalkd.connect({beanstalkd,11300 })
 
   for (feed of feeds) {
     await beanstalkd.put(feed.feed)

@@ -1,0 +1,62 @@
+version: '3'
+services:
+  app:
+    restart: unless-stopped
+    image: rss-to-activity-pub
+    environment:
+      - DOMAIN=rss.fediwersum.pl
+    labels:
+      traefik.enable: "true"     
+#      traefik.http.routers.rss-to-activity-pub-conv.entrypoints: websecure
+#      traefik.http.routers.rss-to-activity-pub-conv.rule: (Host(`rss.fediwersum.pl`) && PathPrefix(`/convert`))
+#      traefik.http.routers.rss-to-activity-pub-conv.middlewares: rss-to-activity-pub-auth
+#      traefik.http.routers.rss-to-activity-pub-conv.tls.certresolver: le
+#      traefik.http.middlewares.rss-to-activity-pub-auth.basicauth.users: some:user
+      traefik.http.routers.rss-to-activity-pub.entrypoints: websecure
+      traefik.http.routers.rss-to-activity-pub.rule: Host(`rss.fediwersum.pl`)
+      traefik.http.routers.rss-to-activity-pub.tls.certresolver: le
+      traefik.http.services.rss-to-activity-pub.loadbalancer.server.port: 3000
+    networks:
+      - frontend
+      - beanstalk
+    volumes:
+      - data:/app/data
+  
+  cron:
+    restart: unless-stopped
+    image: rss-to-activity-pub
+    environment:
+      - DOMAIN=rss.fediwersum.pl
+    command: /usr/sbin/crond -f -l 0 
+    volumes:
+      - data:/app/data
+    networks:
+      - beanstalk
+      
+  update-feeds:
+    restart: unless-stopped
+    image: rss-to-activity-pub
+    environment:
+      - DOMAIN=rss.fediwersum.pl
+    command: /init-update.sh
+    volumes:
+      - data:/app/data
+    networks:
+      - beanstalk
+
+  beanstalkd:
+    restart: unless-stopped
+    image: schickling/beanstalkd
+    networks:
+      - beanstalk
+    
+      
+networks:
+  frontend:
+    external: true
+  beanstalk:
+    driver: overlay
+
+volumes:
+  data:
+    driver: local

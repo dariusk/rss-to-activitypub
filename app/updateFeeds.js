@@ -1,7 +1,7 @@
 const config = require('./config.json');
 const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
 const Database = require('better-sqlite3');
-const db = new Database('bot-node.db'),
+const db = new Database('data/bot-node.db'),
       Parser = require('rss-parser'),
       request = require('request'),
       crypto = require('crypto'),
@@ -10,7 +10,7 @@ const db = new Database('bot-node.db'),
 const Jackd = require('jackd');
 const beanstalkd = new Jackd();
 
-beanstalkd.connect()
+beanstalkd.connect({host: 'beanstalkd',port: 11300})
 
 async function foo() {
   while (true) {

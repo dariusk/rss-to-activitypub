@@ -1,7 +1,8 @@
 const Database = require('better-sqlite3');
-const db = new Database('bot-node.db');
+const db = new Database('data/bot-node.db');
 const Jackd = require('jackd');
 const beanstalkd = new Jackd();
+
 
 
 async function foo() {
@@ -13,7 +14,7 @@ async function foo() {
 
   let count = 0;
 
-  await beanstalkd.connect()
+  await beanstalkd.connect({host: 'beanstalkd', port: 11300 })
 
   for (feed of feeds) {
     await beanstalkd.put(feed.feed)

@@ -1,6 +1,6 @@
 {
-  "name": "bot-node",
-  "version": "1.0.0",
+  "name": "rss-to-activitypub",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {

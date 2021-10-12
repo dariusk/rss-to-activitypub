@@ -29,9 +29,6 @@ function signAndSend(message, name, domain, req, res, targetDomain) {
     const signature_b64 = signature.toString('base64');
     const algorithm = 'rsa-sha256';
     let header = `keyId="https://${domain}/u/${name}",algorithm="${algorithm}",headers="(request-target) host date digest",signature="${signature_b64}"`;
-    console.log('signature:',header);
-    console.log('message:',message);
-
     request({
       url: inbox,
       headers: {
@@ -53,7 +50,6 @@ function signAndSend(message, name, domain, req, res, targetDomain) {
 
 function sendAcceptMessage(thebody, name, domain, req, res, targetDomain) {
   const guid = crypto.randomBytes(16).toString('hex');
-  console.log(thebody);
   let message = {
     '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
     'id': `https://${domain}/${guid}`,
@@ -101,7 +97,6 @@ router.post('/', function (req, res) {
         followers = [req.body.actor];
       }
       let followersText = JSON.stringify(followers);
-      console.log('adding followersText', followersText);
       // update into DB
       db.prepare('update accounts set followers = ? where name = ?').run(followersText, `${name}@${domain}`);
     }

@@ -1,15 +1,66 @@
 'use strict';
 const express = require('express'),
       router = express.Router(),
+      cors = require('cors'),
       crypto = require('crypto'),
       request = require('request'),
       Parser = require('rss-parser'),
       parseFavicon = require('parse-favicon').parseFavicon,
-      generateRSAKeypair = require('generate-rsa-keypair');
+      generateRSAKeypair = require('generate-rsa-keypair'),
+      oauth = require('../config.json').OAUTH;
 
-router.get('/convert', function (req, res) {
+router.get('/request-token', cors(), (req, res) => {
+  if (!oauth) {
+    return res.status(501).json({message: `OAuth is not enabled on this server.`});
+  }
+  else if (!oauth.client_id || !oauth.client_secret || !oauth.redirect_uri) {
+    return res.status(501).json({message: `OAuth is misconfigured on this server. Please contact the admin at ${contactEmail} and let them know.`});
+  }
+  else if (!req.query.code) {
+    return res.status(400).json({message: `Request is missing the required 'code' parameter.`});
+  }
+
+  let params = req.query;
+  params.client_id = oauth.client_id;
+  params.client_secret = oauth.client_secret;
+  params.redirect_uri = oauth.redirect_uri;
+  params.grant_type = 'authorization_code';
+  request.post(`https://${oauth.domain}${oauth.token_path}`, {form: params}, (err,httpResponse,body) => {
+    body = JSON.parse(body);
+    if (body.access_token) {
+      return res.json({ access_token: body.access_token, domain: oauth.domain});
+    }
+    else {
+      return res.status(401).json(body);
+    }
+  });
+});
+
+// if oauth is enabled, this function checks to see if we've been sent an access token and validates it with the server
+// otherwise we simply skip verification
+function isAuthenticated(req, res, next) {
+  if (oauth) {
+    request.get({
+      url: `https://${oauth.domain}${oauth.token_verification_path}`,
+      headers: {
+        'Authorization': `Bearer ${req.query.token}`
+      },
+    }, (err, resp, body) => {
+      if (resp.statusCode === 200) {
+        return next();
+      }
+      else {
+        res.redirect('/');
+      }
+    });
+  }
+  else {
+    return next();
+  }
+}
+
+router.get('/convert', isAuthenticated, function (req, res) {
   let db = req.app.get('db');
-  console.log(req.query);
   let username = req.query.username;
   let feed = req.query.feed;
   // reject if username is invalid
@@ -24,7 +75,6 @@ router.get('/convert', function (req, res) {
     res.status(200).json(result);
   }
   else if(feed && username) {
-    console.log('VALIDATING');
     // validate the RSS
     let parser = new Parser();
     parser.parseURL(feed, function(err, feedData) {
@@ -35,8 +85,6 @@ router.get('/convert', function (req, res) {
         res.status(400).json({err: err.message});
       }
       else {
-        console.log(feedData.title);
-        console.log('end!!!!');
         res.status(200).json(feedData);
         let displayName = feedData.title;
         let description = feedData.description;

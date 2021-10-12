@@ -9,7 +9,7 @@ async function foo() {
   // get all feeds from DB
   let feeds = db.prepare('select feed from feeds').all();
 
-  console.log('!!!',feeds.length);
+  // console.log('!!!',feeds.length);
 
   let count = 0;
 

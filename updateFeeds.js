@@ -12,11 +12,10 @@ const beanstalkd = new Jackd();
 
 beanstalkd.connect()
 
-async function foo() {
+async function processQueue() {
   while (true) {
     try {
       const { id, payload } = await beanstalkd.reserve()
-      console.log(payload)
       /* ... process job here ... */
       await beanstalkd.delete(id)
       await doFeed(payload)
@@ -27,7 +26,7 @@ async function foo() {
   }
 }
 
-foo()
+processQueue()
 
 function doFeed(feedUrl) {
 return new Promise((resolve, reject) => {
@@ -63,7 +62,6 @@ return new Promise((resolve, reject) => {
         let brandNewItems = newItems.filter(el => difference.includes(el.guid) || difference.includes(el.title) || difference.includes(el.description));
         let acct = feed.username;
         let domain = DOMAIN;
-        //console.log(acct, brandNewItems);
 
         // send the message to everyone for each item!
         for (var item of brandNewItems) {
@@ -101,7 +99,6 @@ return new Promise((resolve, reject) => {
 // This is a function with a bunch of custom rules for different kinds of content I've found in the wild in things like Reddit rss feeds. Right now we just use the first image we find, if any.
 function transformContent(item) {
   let cheerio = require('cheerio');
-  console.log(JSON.stringify(item));
   if (item.content === undefined) {
     item.urls = [];
     return item;
@@ -111,12 +108,10 @@ function transformContent(item) {
   // look through all the links to find images
   let links = $('a');
   let urls = [];
-  //console.log('links', links.length);
   links.each((i,e) => {
     let url = $(e).attr('href');
     // if there's an image, add it as a media attachment
     if (url && url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/)) {
-      //console.log(url);
       urls.push(url);
     }
   });
@@ -127,7 +122,6 @@ function transformContent(item) {
     let url = $(e).attr('src');
     // if there's an image, add it as a media attachment
     if (url) {
-      //console.log(url);
       urls.push(url);
       // remove the image from the post body since it's in the attachment now
       $(e).remove();
@@ -139,7 +133,6 @@ function transformContent(item) {
   // find iframe embeds and turn them into links
   let iframes = $('iframe');
   iframes.each((i,e) => {
-    console.log('iframe',i,e);
     let url = $(e).attr('src');
     $(e).replaceWith($(`<a href="${url}">[embedded content]</a>`));
   });
@@ -163,10 +156,8 @@ function transformContent(item) {
 // TODO import these form a helper
 function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
   // get the private key
-  console.log('sending to ', name, targetDomain, inbox);
   let inboxFragment = inbox.replace('https://'+targetDomain,'');
   let result = db.prepare('select privkey from accounts where name = ?').get(`${name}@${domain}`);
-  //console.log('got key', result === undefined, `${name}@${domain}`);
   if (result === undefined) {
     console.log(`No record found for ${name}.`);
   }
@@ -184,7 +175,6 @@ function signAndSend(message, name, domain, req, res, targetDomain, inbox) {
     const signature_b64 = signature.toString('base64');
     const algorithm = 'rsa-sha256';
     let header = `keyId="https://${domain}/u/${name}",algorithm="${algorithm}",headers="(request-target) host date digest",signature="${signature_b64}"`;
-    //console.log('signature:',header);
     request({
       url: inbox,
       headers: {
@@ -228,7 +218,6 @@ function createMessage(text, name, domain, item, follower, guidNote) {
 
   // add image attachment
   let attachment;
-  console.log('NUM IMAGES',item.urls.length);
   if (item.enclosure && item.enclosure.url && item.enclosure.url.includes('.mp3')) {
     attachment = {
       'type': 'Document',
@@ -261,7 +250,6 @@ function createMessage(text, name, domain, item, follower, guidNote) {
     out.object.attachment = attachment;
   }
 
-  console.log(guidCreate, guidNote);
   db.prepare('insert or replace into messages(guid, message) values(?, ?)').run( guidCreate, JSON.stringify(out));
   db.prepare('insert or replace into messages(guid, message) values(?, ?)').run( guidNote, JSON.stringify(out.object));
 
@@ -269,11 +257,9 @@ function createMessage(text, name, domain, item, follower, guidNote) {
 }
 
 function sendCreateMessage(text, name, domain, req, res, item) {
-  // console.log(`${name}@${domain}`);
   let result = db.prepare('select followers from accounts where name = ?').get(`${name}@${domain}`);
   let followers = JSON.parse(result.followers);
   const guidNote = crypto.randomBytes(16).toString('hex');
-  // console.log(followers);
   if (!followers) {
     followers = [];
   }

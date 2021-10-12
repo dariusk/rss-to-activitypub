@@ -1,5 +1,5 @@
 const config = require('./config.json');
-const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS } = config;
+const { DOMAIN, PRIVKEY_PATH, CERT_PATH, PORT_HTTP, PORT_HTTPS, OAUTH } = config;
 const express = require('express');
 const app = express();
 const Database = require('better-sqlite3');
@@ -41,7 +41,7 @@ app.set('view engine', 'pug');
 app.use(bodyParser.json({type: 'application/activity+json'})); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-app.get('/', (req, res) => res.render('home'));
+app.get('/', (req, res) => res.render('home', { OAUTH }));
 
 // admin page
 app.options('/api', cors());

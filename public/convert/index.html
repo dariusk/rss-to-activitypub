@@ -33,6 +33,8 @@
 <body>
 <h1>Convert an RSS feed to ActivityPub</h1>
 <p><em>by <a href="https://friend.camp/@darius">Darius Kazemi</a>, <a href="https://github.com/dariusk/rss-to-activitypub">source code here</a></em></p>
+<div id="convert">
+<p id="login-confirmed"></p>
 <p>Put the full RSS feed URL in here, and pick a username for the account that will track the feed.</p>
 <p>
 <input id="feed" type="text" placeholder="https://example.com/feed.xml"/>
@@ -44,15 +46,18 @@
 <button onclick="submit()">Submit</button>
 <div id="out">
 </div>
+</div>
+<div id="login" hidden=true>
+<p>You aren't logged in! <a href="/">Go here to log in.</a></p>
+</div>
 
 <script>
-// https://bots.tinysubversions.com/api/convert/?feed=https://toomuchnotenough.site/feed.xml&username=tmne
 function submit() {
 let domain = document.domain;
 let feed = encodeURIComponent(document.querySelector('#feed').value);
 let username = document.querySelector('#username').value;
 let out = document.querySelector('#out');
-fetch(`/api/convert/?feed=${feed}&username=${username}`)
+fetch(`/api/convert/?feed=${feed}&username=${username}&token=${access_token}`)
   .then(function(response) {
     return response.json();
   })
@@ -65,13 +70,11 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
     if (myJson.content) {
       // was it a match on feed
       if (myJson.feed === decodeURIComponent(feed)) {
-        console.log('feed match!');
         out.innerHTML = `<p>This feed already exists! Follow @${myJson.username}@${domain}.</p>`;
         window.location = `/u/${myJson.username}`;
       }
       // was it a match on username
       else if (myJson.username === username) {
-        console.log('username match!');
         out.innerHTML = `<p>This username is already taken for <a href="${myJson.feed}">this feed</a>.</p>`;
       }
     }
@@ -81,9 +84,52 @@ fetch(`/api/convert/?feed=${feed}&username=${username}`)
 
   })
   .catch(error => {
-    console.log('!!!',error);
     out.innerHTML = `<p>Error: ${error}</p>`;
   });
+}
+
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
+
+if (!localStorage.getItem('rss-data')) {
+  localStorage.setItem('rss-data','{}');
+}
+let {access_token, domain} = JSON.parse(localStorage.getItem('rss-data'));
+
+// if no access token in storage, no code in url
+// hide app, show login prompt
+if (!getUrlParameter('code') && !access_token) {
+  document.getElementById('convert').hidden = true;
+  document.getElementById('login').hidden = false;
+}
+// if no access token in storage, code in url
+// send the code parameter to the server to get an access token
+// store the result in localStorage, reload the page
+if (getUrlParameter('code') && !access_token) {
+  fetch(`/api/request-token/?code=${getUrlParameter('code')}`)
+    .then((resp) => resp.json())
+    .then(data => {
+      localStorage.setItem('rss-data',JSON.stringify(data));
+      // reload without url parameters
+      window.location.href = window.location.origin + window.location.pathname;
+    });
+}
+// if we have an access token, then we can render our app
+if (JSON.parse(localStorage.getItem('rss-data')).access_token) {
+  let {access_token, domain} = JSON.parse(localStorage.getItem('rss-data'));
+
+  document.getElementById('login').hidden = true;
+  document.getElementById('login-confirmed').innerHTML = `<p>Welcome! You are logged in via your <strong>${domain}</strong> account. <a href="#" onclick="logOut()">Click here</a> to log out.</p>`;
+  document.getElementById('convert').hidden = false;
+}
+
+function logOut() {
+	localStorage.removeItem('rss-data');
+	window.location = window.location;
 }
 </script>
 </body>
